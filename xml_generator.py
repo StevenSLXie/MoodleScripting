@@ -6,25 +6,24 @@ def description_generator(file):
 		lines = f.readlines()
 		quiz = e.Element('quiz')
 
+		quiz.append(category_create('SL Xie'))
+
 		i = 0
+		num = 1
 		while i < len(lines)-1:
 			question = e.Element('question', type='description')
 			name = e.Element('name')
-			text = e.Element('text')
-			text.text = cdata_wrapper('SL')
-			name.append(text)
+			name.append(text_wrapper('4d:' + str(num)))
+			num += 1
 			question.append(name)
 			questiontext = e.Element('questiontext', format="html")
-			temp_text = lines[i]
-			# print i,lines[i]
+			temp_text = lines[i].replace('\\item[1.]', '').replace('\\item[(a)]', '').replace('\item[(b)]', '')
 			i += 1
 			while i< len(lines)-1 and not lines[i].count('item'):
 				temp_text += lines[i]
 				i += 1
-			text = e.Element('text')
-			text.text = cdata_wrapper(temp_text)
 
-			questiontext.append(text)
+			questiontext.append(text_wrapper(temp_text))
 			question.append(questiontext)
 			quiz.append(question)
 
@@ -41,30 +40,24 @@ def description_generator(file):
 		# print s
 
 
-
-
-
 def multiple_choice_generator(file):
 	with open(file) as f:
 		lines = f.readlines()
-		#for l in lines:
-		#	print l
+
 		ans = find_answer(lines)
 
 		quiz = e.Element('quiz')
+		quiz.append(category_create('SL Xie'))
+
 		i = 0
 		num = 0
 		while True:
 			question = e.Element('question', type='multichoice')
 			name = e.Element('name')
-			text = e.Element('text')
-			text.text = cdata_wrapper(str(num+1))
-			name.append(text)
+			name.append(text_wrapper('4m:'+str(num+1)))
 			question.append(name)
 			questiontext = e.Element('questiontext', format="html")
-			text = e.Element('text')
-			text.text = cdata_wrapper(lines[i].replace('questiontext: ', ''))
-			questiontext.append(text)
+			questiontext.append(text_wrapper(lines[i].replace('questiontext: ', '')))
 			question.append(questiontext)
 			print i, num, lines[i]
 			i += 1
@@ -74,9 +67,7 @@ def multiple_choice_generator(file):
 					answer = e.Element('answer', fraction='100')
 				else:
 					answer = e.Element('answer', fraction='0')
-				text = e.Element('text')
-				text.text = cdata_wrapper(lines[i][2:])
-				answer.append(text)
+				answer.append(text_wrapper(lines[i][2:]))
 				question.append(answer)
 				i += 1
 
@@ -89,17 +80,13 @@ def multiple_choice_generator(file):
 			while lines[i].count('hint'):
 				# record hint, if any, if multiple
 				hint = e.Element('hint')
-				text = e.Element('text')
-				text.text = cdata_wrapper(lines[i][7:])
-				hint.append(text)
+				hint.append(text_wrapper(lines[i][7:]))
 				question.append(hint)
 				i += 1
 
 			i += 1
 			generalfeedback = e.Element('generalfeedback')
-			text = e.Element('text')
-			text.text = lines[i].replace('gfeed.', '')
-			generalfeedback.append(text)
+			generalfeedback.append(text_wrapper(lines[i].replace('gfeed.', '')))
 
 			question.append(generalfeedback)
 
@@ -109,8 +96,6 @@ def multiple_choice_generator(file):
 			i += 1
 
 			num += 1
-			# while lines[i] == '\n':
-			#	i += 1
 
 			if i >= len(lines)-1:
 				break
@@ -122,6 +107,25 @@ def multiple_choice_generator(file):
 		writer = open('data/x4_mc.xml', 'w')
 		writer.writelines(s)
 		# print s
+
+
+def text_wrapper(s):
+	text = e.Element('text')
+	text.text = cdata_wrapper(s)
+	return text
+
+
+def category_create(s):
+	# create category
+
+	questioncategory = e.Element('question', type='category')
+	category = e.Element('category')
+	text = e.Element('text')
+	text.text = cdata_wrapper(s)
+	category.append(text)
+	questioncategory.append(category)
+
+	return questioncategory
 
 
 def cdata_wrapper(s):

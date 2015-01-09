@@ -66,6 +66,7 @@ def categorize(lines):
 					i += 1
 				mc.append('\n')
 			else:
+				# for other question type
 				i += 1
 		elif lines[i].count('item'):
 			#print '2:' + str(i)
